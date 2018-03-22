@@ -49,9 +49,9 @@ let make = _children => {
       </div>
       <div className="items">
         (
-          ReasonReact.arrayToElement(
-            Array.of_list(List.map(item => <TodoItem item />, items)),
-          )
+          List.map(item => <TodoItem item />, items)
+          |> Array.of_list
+          |> ReasonReact.arrayToElement
         )
       </div>
       <div className="footer">
