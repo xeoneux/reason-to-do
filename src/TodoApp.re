@@ -3,16 +3,31 @@ type item = {
   completed: bool,
 };
 
+let str = ReasonReact.stringToElement;
+
+module TodoItem = {
+  let component = ReasonReact.statelessComponent("TodoItem");
+  let make = (~item, _children) => {
+    ...component,
+    render: _self =>
+      <div className="item">
+        <input
+          _type="checkbox"
+          checked=(Js.Boolean.to_js_boolean(item.completed))
+        />
+        (str(item.title))
+      </div>,
+  };
+};
+
 type state = {items: list(item)};
 
 type action =
   | AddItem;
 
-let newItem = () => {title: "Click a button", completed: true};
-
 let component = ReasonReact.reducerComponent("TodoApp");
 
-let str = ReasonReact.stringToElement;
+let newItem = () => {title: "Click a button", completed: true};
 
 let make = _children => {
   ...component,
@@ -32,7 +47,13 @@ let make = _children => {
           (str("Add something"))
         </button>
       </div>
-      <div className="items"> (str("Nothing")) </div>
+      <div className="items">
+        (
+          ReasonReact.arrayToElement(
+            Array.of_list(List.map(item => <TodoItem item />, items)),
+          )
+        )
+      </div>
       <div className="footer">
         (str(string_of_int(numItems) ++ " items"))
       </div>
