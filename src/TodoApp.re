@@ -1,4 +1,5 @@
 type item = {
+  id: int,
   title: string,
   completed: bool,
 };
@@ -27,12 +28,17 @@ type action =
 
 let component = ReasonReact.reducerComponent("TodoApp");
 
-let newItem = () => {title: "Click a button", completed: true};
+let lastId = ref(0);
+
+let newItem = () => {
+  lastId := lastId^ + 1;
+  {id: lastId^, title: "Click a button", completed: true};
+};
 
 let make = _children => {
   ...component,
   initialState: () => {
-    items: [{title: "Write some things to do", completed: false}],
+    items: [{id: 0, title: "Write some things to do", completed: false}],
   },
   reducer: (action, {items}) =>
     switch (action) {
@@ -49,7 +55,10 @@ let make = _children => {
       </div>
       <div className="items">
         (
-          List.map(item => <TodoItem item />, items)
+          List.map(
+            item => <TodoItem key=(string_of_int(item.id)) item />,
+            items,
+          )
           |> Array.of_list
           |> ReasonReact.arrayToElement
         )
