@@ -21,19 +21,48 @@ module TodoItem = {
   };
 };
 
+let obj = event =>
+  event |> ReactEventRe.Form.target |> ReactDOMRe.domElementToObj;
+
+let valueFromEvent = event => obj(event)##value;
+
+module Input = {
+  type state = string;
+  let component = ReasonReact.reducerComponent("Input");
+  let make = (~onSubmit, _children) => {
+    ...component,
+    initialState: () => "",
+    reducer: (newText, _text) => ReasonReact.Update(newText),
+    render: ({state: text, reduce}) =>
+      <input
+        value=text
+        _type="text"
+        placeholder="Write something to do"
+        onChange=(reduce(event => valueFromEvent(event)))
+        onKeyDown=(
+          event =>
+            if (ReactEventRe.Keyboard.key(event) == "Enter") {
+              onSubmit(text);
+              (reduce(() => ""))();
+            }
+        )
+      />,
+  };
+};
+
 type state = {items: list(item)};
 
 type action =
-  | AddItem
+  | AddItem(string)
   | ToggleItem(int);
 
 let component = ReasonReact.reducerComponent("TodoApp");
 
 let lastId = ref(0);
 
-let newItem = () => {
+let newItem = text => {
   lastId := lastId^ + 1;
-  {id: lastId^, title: "Click a button", completed: true};
+  {id: lastId^, title: text, completed: true};
 };
 
 let make = _children => {
@@ -43,7 +72,8 @@ let make = _children => {
   },
   reducer: (action, {items}) =>
     switch (action) {
-    | AddItem => ReasonReact.Update({items: [newItem(), ...items]})
+    | AddItem(text) =>
+      ReasonReact.Update({items: [newItem(text), ...items]})
     | ToggleItem(id) =>
       let items =
         List.map(
@@ -58,9 +88,7 @@ let make = _children => {
     <div className="app">
       <div className="title">
         (str("What to do"))
-        <button onClick=(reduce(_event => AddItem))>
-          (str("Add something"))
-        </button>
+        <Input onSubmit=(text => AddItem(text)) />
       </div>
       <div className="items">
         (
