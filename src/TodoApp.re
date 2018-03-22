@@ -5,6 +5,8 @@ type item = {
 
 type state = {items: list(item)};
 
+let newItem = () => {title: "Click a button", completed: true};
+
 let component = ReasonReact.reducerComponent("TodoApp");
 
 let str = ReasonReact.stringToElement;
@@ -18,7 +20,12 @@ let make = _children => {
   render: ({state: {items}}) => {
     let numItems = List.length(items);
     <div className="app">
-      <div className="title"> (str("What to do")) </div>
+      <div className="title">
+        (str("What to do"))
+        <button onClick=(_event => Js.log("Didn't add something"))>
+          (str("Add something"))
+        </button>
+      </div>
       <div className="items"> (str("Nothing")) </div>
       <div className="footer">
         (str(string_of_int(numItems) ++ " items"))
